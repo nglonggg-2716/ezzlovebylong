@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Trang tình yêu</title>
+  <style>
+    :root{
+      --pink1:#ffc1e3;
+      --pink2:#ff8fc1;
+      --bg:#fff0f8;
+      --pink-dark:#ff4f9a;
+      --pink-flap:#FF6699;
+      --pink-body:#ffffff;
+    }
+    html,body{height:100%;margin:0;font-family:'Dancing Script',cursive,Inter,system-ui,Segoe UI,Arial;background:linear-gradient(135deg,var(--pink1),var(--pink2));overflow:hidden;}
+    .scene{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;position:relative;z-index:1}
+
+    .bg-hearts{position:absolute;inset:0;overflow:hidden;z-index:0;pointer-events:none;}
+    .bg-heart{position:absolute;width:20px;height:20px;background:red;transform:rotate(45deg);animation:floatBg 10s linear infinite;opacity:0.4}
+    .bg-heart:before,.bg-heart:after{content:'';position:absolute;width:20px;height:20px;background:red;border-radius:50%}
+    .bg-heart:before{top:-10px;left:0}
+    .bg-heart:after{left:-10px;top:0}
+
+    @keyframes floatBg{
+      0%{transform:translateY(100vh) rotate(45deg);opacity:0.5}
+      100%{transform:translateY(-20vh) rotate(45deg);opacity:0}
+    }
+
+    .envelope{position:relative;width:320px;height:220px;cursor:pointer;perspective:1000px;z-index:2;display:flex;align-items:center;justify-content:center;}
+    .back{position:absolute;width:100%;height:100%;background:var(--pink-body);border:4px solid black;border-radius:8px;box-shadow:0 12px 30px rgba(0,0,0,0.12);z-index:0;display:flex;align-items:flex-end;justify-content:center;font-size:20px;color:#000;font-weight:bold;font-family:'Pacifico',cursive;text-align:center;padding:10px;padding-bottom:20px;}
+    .flap{position:absolute;width:100%;height:50%;top:0;left:0;background:var(--pink-flap);border:4px solid black;border-bottom:4px solid black;clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top center;transition:transform 0.8s ease, opacity 0.3s ease;z-index:2;box-sizing:border-box;}
+    .letter{position:absolute;bottom:10px;left:50%;transform:translateX(-50%) translateY(100%);width:85%;height:80%;background:#fff;border-radius:6px;border:3px dashed #ff8fc1;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:32px;color:#ff2d8a;opacity:0;transition:opacity 0.5s ease,transform 0.5s ease;z-index:1;font-family:'Dancing Script',cursive;}
+
+    .open .flap{transform:rotateX(-180deg);opacity:0;}
+    .open .letter{opacity:1;transform:translateX(-50%) translateY(0);transition-delay:0.4s;}
+    .close .flap{transform:rotateX(0deg);opacity:1;}
+    .close .letter{opacity:0;transform:translateX(-50%) translateY(100%);}
+
+    .hearts{position:absolute;inset:0;pointer-events:none;z-index:3;}
+    .heart{position:absolute;width:22px;height:22px;transform:translate(-50%,-50%) scale(0);opacity:0}
+    .heart:before,.heart:after{content:"";position:absolute;left:11px;top:0;width:11px;height:18px;background:var(--heart-color,#ff6aa6);border-radius:11px 11px 0 0;transform-origin:center bottom}
+    .heart:before{transform:rotate(-45deg);left:0}
+    .heart:after{transform:rotate(45deg);right:0}
+
+    @keyframes floatUp{
+      0%{transform:translateY(0) scale(0.8);opacity:0}
+      10%{transform:translateY(0) scale(1.1);opacity:1}
+      100%{transform:translateY(-240px) scale(0.6);opacity:0}
+    }
+
+    @media (max-width:420px){.envelope{width:260px;height:180px}.letter{font-size:24px}}
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Pacifico&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="bg-hearts" id="bgHearts"></div>
+  <main class="scene">
+    <div class="envelope close" id="envelope" role="button" aria-pressed="false" tabindex="0">
+      <div class="back" id="backText">người đẹp ơi bạn có thư nè</div>
+      <div class="flap" id="flap"></div>
+      <div class="letter" id="letter">LONG YÊU VANH</div>
+      <div class="hearts" id="hearts"></div>
+    </div>
+  </main>
+
+  <audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3" preload="auto"></audio>
+
+  <script>
+    const env = document.getElementById('envelope');
+    const flap = document.getElementById('flap');
+    const heartsContainer = document.getElementById('hearts');
+    const bgHearts = document.getElementById('bgHearts');
+    const clickSound = document.getElementById('clickSound');
+    const backText = document.getElementById('backText');
+    let opened = false;
+
+    function rand(min,max){return Math.random()*(max-min)+min}
+
+    function makeHeart(x,y,delay,color){
+      const h = document.createElement('div');
+      h.className='heart';
+      h.style.left = x + '%';
+      h.style.top = y + '%';
+      h.style.setProperty('--heart-color', color || '#ff6aa6');
+      h.style.animation = `floatUp ${rand(2000,3800)}ms ease-in forwards`;
+      h.style.animationDelay = (delay||0)+'ms';
+      heartsContainer.appendChild(h);
+      setTimeout(()=>{h.remove()}, 4000);
+    }
+
+    function burstHearts(){
+      for(let i=0;i<20;i++){
+        const x = rand(20,80);
+        const y = rand(40,60);
+        const delay = i*60;
+        const color = `hsl(${rand(0,360)},80%,70%)`;
+        makeHeart(x,y,delay,color);
+      }
+    }
+
+    function toggleEnvelope(){
+      clickSound.currentTime = 0;
+      clickSound.play();
+      opened = !opened;
+      if(opened){
+        env.classList.remove('close');
+        env.classList.add('open');
+        env.setAttribute('aria-pressed','true');
+        backText.style.display = 'none';
+        flap.style.opacity = '0';
+        burstHearts();
+      } else {
+        env.classList.remove('open');
+        env.classList.add('close');
+        env.setAttribute('aria-pressed','false');
+        backText.style.display = 'flex';
+        flap.style.opacity = '1';
+      }
+    }
+
+    env.addEventListener('click', toggleEnvelope);
+    env.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); toggleEnvelope(); } });
+
+    function createBgHeart(){
+      const h = document.createElement('div');
+      h.className='bg-heart';
+      const size = rand(10,25);
+      h.style.width = size+'px';
+      h.style.height = size+'px';
+      h.style.background = `hsl(${rand(0,360)},80%,70%)`;
+      h.style.top = '100%';
+      h.style.left = rand(0,100)+'%';
+      h.style.animationDuration = rand(8,15)+'s';
+      bgHearts.appendChild(h);
+      setTimeout(()=>h.remove(),15000);
+    }
+    setInterval(createBgHeart, 200);
+  </script>
+</body>
+</html>
